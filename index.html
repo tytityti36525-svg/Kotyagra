@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐱 КотяГра</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e8a820">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="КотяГра">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="loading-cat">🐱</div>
+  <div class="loading-title">КотяГра</div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-cat">🐱</div>
+    <div class="auth-title">КотяГра</div>
+    <div class="auth-sub">Виховуй свого котика онлайн!</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">Увійти</button>
+      <button class="auth-tab" onclick="switchTab('reg')">Реєстрація</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+    <input class="auth-field" id="a-email" type="email" placeholder="Email" autocomplete="email">
+    <input class="auth-field" id="a-pass" type="password" placeholder="Пароль" autocomplete="current-password">
+    <input class="auth-field" id="a-name" placeholder="Нікнейм гравця" style="display:none" autocomplete="username">
+    <input class="auth-field" id="a-cat" placeholder="Ім'я котика (напр. Бася)" style="display:none">
+    <button class="auth-submit" id="auth-btn" onclick="doAuth()">Увійти 🐾</button>
+    <div style="text-align:center;margin-top:10px">
+      <button class="auth-google" onclick="doGoogleAuth()"><span>G</span> Google</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game-wrap" style="display:none">
+<div class="inner">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="cat-av" onclick="goPage('pet')">🐱</div>
+    <div class="stats-row">
+      <div class="stat">🦋<span id="s-b">0</span></div>
+      <div class="stat">🪙<span id="s-c">50</span></div>
+      <div class="stat">❤️<span id="s-h">500</span></div>
+    </div>
+    <button class="pname-top" id="s-pn" onclick="goPage('pet')">Гравець ▾</button>
+  </div>
+  <div class="lvl-wrap">
+    <div class="lvl-lbl"><span>⬆️ Рів.<span id="s-lv">1</span></span><span id="s-xp">0/50 XP</span></div>
+    <div class="lvl-track"><div class="lvl-fill" id="s-lf" style="width:0%"></div></div>
+  </div>
+  <div class="notif" id="notif"><div class="notif-t" id="nt"></div><div class="notif-b" id="nb"></div></div>
+
+  <!-- ══ HOME ══ -->
+  <div class="screen active" id="pg-home">
+    <div class="card cat-card-wrap">
+      <div class="sleeping-ov" id="sl-ov">💤😴💤<div id="sleep-countdown" style="font-size:.8rem;margin-top:4px;color:#fff"></div></div>
+      <div class="cat-big" id="cat-emoji" onclick="petCat()">🐱</div>
+      <div class="cat-name-d" id="cat-dn">Котик</div>
+      <div class="cat-mood" id="cat-mood">Настрій: щасливий 😊</div>
+      <div class="needs">
+        <div class="need-item nh"><div class="need-lbl"><span>🍖 Їжа</span><span id="v-h">70%</span></div>
+          <div class="need-track"><div class="need-fill" id="b-h" style="width:70%"></div></div></div>
+        <div class="need-item nt"><div class="need-lbl"><span>💧 Вода</span><span id="v-t">60%</span></div>
+          <div class="need-track"><div class="need-fill" id="b-t" style="width:60%"></div></div></div>
+        <div class="need-item nf"><div class="need-lbl"><span>🎉 Розваги</span><span id="v-f">50%</span></div>
+          <div class="need-track"><div class="need-fill" id="b-f" style="width:50%"></div></div></div>
+        <div class="need-item ne"><div class="need-lbl"><span>⚡ Енергія</span><span id="v-e">80%</span></div>
+          <div class="need-track"><div class="need-fill" id="b-e" style="width:80%"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Швидкі дії</div>
+      <div class="action-grid">
+        <button class="act-btn bf" onclick="act('feed')"><span class="bi">🍖</span><span class="bl">Годувати</span><span class="bc">безкоштовно</span></button>
+        <button class="act-btn bw" onclick="act('water')"><span class="bi">💧</span><span class="bl">Напоїти</span><span class="bc">безкоштовно</span></button>
+        <button class="act-btn bp" onclick="act('play')"><span class="bi">🎾</span><span class="bl">Гратися</span><span class="bc">-15⚡</span></button>
+        <button class="act-btn bs" onclick="act('sleep')" id="sleep-btn"><span class="bi">😴</span><span class="bl">Спати 30хв</span><span class="bc">+30⚡</span></button>
+        <button class="act-btn bt" onclick="goPage('train')"><span class="bi">🏋️</span><span class="bl">Тренінг</span><span class="bc">+XP</span></button>
+        <button class="act-btn bsh" onclick="goPage('show')"><span class="bi">🏆</span><span class="bl">Виставка</span><span class="bc">призи!</span></button>
+      </div>
+    </div>
+    <div class="home-menu-grid">
+      <div class="hm-item" onclick="goPage('shop')"><span>🛍️</span><span>Магазин</span></div>
+      <div class="hm-item" onclick="goPage('walks')"><span>🌳</span><span>Прогулянка</span></div>
+      <div class="hm-item" onclick="goPage('gems')"><span>💎</span><span>Скарби</span></div>
+      <div class="hm-item" onclick="goPage('pet')"><span>🐱</span><span>Котик</span></div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Щоденник</div>
+      <div class="log-box" id="log-box"><div class="log-e">Котик прокинувся і хоче гратися!</div></div>
+    </div>
+    <div class="footer-txt">© 2026 КотяГра · Онлайн: <span id="s-on">—</span> · <button onclick="logout()" class="logout-btn">Вийти</button></div>
+  </div>
+
+  <!-- ══ PET PAGE ══ -->
+  <div class="screen" id="pg-pet">
+    <div class="pet-avatar-card">
+      <div class="pet-outfit-grid">
+        <div class="pet-slots-left">
+          <div class="equip-slot" id="slot-shirt" onclick="openWardrobe('shirt')">
+            <span id="eq-shirt">👕</span><div class="slot-label">Одяг</div>
+          </div>
+          <div class="equip-slot" id="slot-collar" onclick="openWardrobe('collar')">
+            <span id="eq-collar">➿</span><div class="slot-label">Нашийник</div>
+          </div>
+          <div class="equip-slot" id="slot-ring" onclick="openWardrobe('ring')">
+            <span id="eq-ring">💍</span><div class="slot-label">Кільце</div>
+          </div>
+        </div>
+        <div class="pet-center">
+          <div class="pet-cat-big" id="pet-big-emoji" onclick="petCat()">🐱</div>
+          <div class="pet-cat-name" id="pet-cat-name">Котик</div>
+          <div class="pet-cat-lvl" id="pet-cat-lvl">1 рівень</div>
+        </div>
+        <div class="pet-slots-right">
+          <div class="equip-slot" id="slot-hat" onclick="openWardrobe('hat')">
+            <span id="eq-hat">🎩</span><div class="slot-label">Капелюх</div>
+          </div>
+          <div class="equip-slot" id="slot-toy" onclick="openWardrobe('toy')">
+            <span id="eq-toy">🎾</span><div class="slot-label">Іграшка</div>
+          </div>
+          <div class="equip-slot" id="slot-medal" onclick="openWardrobe('medal')">
+            <span id="eq-medal">🏅</span><div class="slot-label">Медаль</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card pet-stats-card">
+      <div class="pet-stat-row">
+        <span class="psi">🐱</span>
+        <span class="psn"><b id="ps-name">Котик</b>, <span id="ps-lv">1</span> рівень</span>
+      </div>
+      <div class="pet-stat-row clickable" onclick="editAbout()">
+        <span class="psi">😊</span>
+        <span class="psn">Про себе: <span id="ps-about" style="color:var(--gold)">заповнити...</span></span>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">⭐</span>
+        <span class="psn">Досвід: <span id="ps-xp">0</span> / <span id="ps-cap">50</span></span>
+        <div class="mini-bar-wrap"><div class="mini-bar gold" id="ps-xpbar" style="width:0%"></div></div>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">🦋</span>
+        <span class="psn">Краса: <b id="ps-beauty">0</b></span>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">🎈</span>
+        <span class="psn" id="ps-club">Клуб: —</span>
+      </div>
+      <div class="pet-stat-row clickable" onclick="raiseClubLoyalty()">
+        <span class="psi">🎗️</span>
+        <span class="psn">Вірність клубу: <b id="ps-loyalty">0%</b> <span style="color:var(--gold);font-size:.7rem">(Підняти)</span></span>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">📅</span>
+        <span class="psn">Днів в клубі: <b id="ps-clubdays">0</b></span>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">📅</span>
+        <span class="psn">Днів в грі: <b id="ps-gamedays">0</b></span>
+      </div>
+      <div class="pet-stat-row">
+        <span class="psi">🪙</span>
+        <span class="psn">Монети: <b id="ps-coins">0</b></span>
+      </div>
+      <div class="pet-stat-row last">
+        <span class="psi">❤️</span>
+        <span class="psn">Сердечка: <b id="ps-hearts">0</b></span>
+      </div>
+    </div>
+
+    <!-- House -->
+    <div class="card house-card">
+      <div class="sec-title">🏠 Будинок котика</div>
+      <div class="house-display">
+        <div class="house-emoji" id="house-emoji">🏠</div>
+        <div class="house-info">
+          <div class="house-name" id="house-name">Проста хатинка</div>
+          <div class="house-beauty">+<span id="house-beauty">0</span> 🦋 краси</div>
+          <div class="house-lvl">Рівень: <span id="house-lvl">1</span>/10</div>
+        </div>
+      </div>
+      <button class="orange-btn" onclick="upgradeHouse()" id="house-upgrade-btn">
+        Покращити 🏗️ — <span id="house-cost">100</span> 🪙
+      </button>
+    </div>
+
+    <div class="card pet-menu-card">
+      <div class="pet-menu-row" onclick="goPage('mail')">
+        <span class="pmi">📬</span><span class="pmn">Пошта</span>
+        <span class="pmc" id="pm-mail-cnt"></span>
+      </div>
+      <div class="pet-menu-row" onclick="openWardrobe('all')">
+        <span class="pmi">🚪</span><span class="pmn">Шафа (одяг)</span>
+        <span class="pmc" id="pm-wardrobe-cnt">0 з 20</span>
+      </div>
+      <div class="pet-menu-row" onclick="openGifts()">
+        <span class="pmi">🎁</span><span class="pmn">Подарунки</span>
+        <span class="pmc" id="pm-gifts-cnt">0</span>
+      </div>
+      <div class="pet-menu-row" onclick="goPage('gems')">
+        <span class="pmi">💎</span><span class="pmn">Дорогоцінності</span>
+        <span class="pmc" id="pm-gems-cnt">0</span>
+      </div>
+      <div class="pet-menu-row" onclick="goPage('train')">
+        <span class="pmi">🏋️</span><span class="pmn">Тренування</span>
+        <span class="pmc" id="pm-train-cnt">0</span>
+      </div>
+    </div>
+    <button class="grey-btn" onclick="logout()">🚪 Вийти з акаунту</button>
+  </div>
+
+  <!-- ══ TRAIN ══ -->
+  <div class="screen" id="pg-train">
+    <div class="page-hdr">🏋️ Тренування навичок</div>
+    <div class="glamour-bar">🌸 Гламур: <span id="t-gl">0</span> · 🦋 Краса: <span id="t-bu">0</span></div>
+    <div class="card"><div id="train-items"></div>
+      <div class="info-box">Кожне тренування підвищує красу і гламур на +1. Витрачає ❤️ 150.</div>
+    </div>
+  </div>
+
+  <!-- ══ GEMS ══ -->
+  <div class="screen" id="pg-gems">
+    <div class="page-hdr">💎 Ларець з дорогоцінностями</div>
+    <div class="card gold-card">
+      <div style="text-align:center;font-size:.78rem;font-weight:800;color:var(--gdk);margin-bottom:9px">✨ Збирай камені на прогулянках — отримуй бонуси!</div>
+      <div id="gem-list"></div>
+      <div class="gem-summary">
+        <div id="gem-sum" style="font-size:.9rem;letter-spacing:2px;margin-bottom:3px"></div>
+        <div style="font-size:.68rem;color:var(--tl);font-weight:700">Кожні 5 частин → зібрати камінь і отримати нагороду</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Зібрати камінь (5 частин)</div>
+      <div class="action-grid" id="gem-assemble"></div>
+    </div>
+  </div>
+
+  <!-- ══ WALKS ══ -->
+  <div class="screen" id="pg-walks">
+    <div class="page-hdr">🌳 Прогулянки</div>
+    <div class="info-box-green">На прогулянках котик отримує досвід, монети і знаходить дорогоцінності!</div>
+    <div id="walk-active-div" style="display:none">
+      <div class="walk-active-banner">
+        🐾 Котик на прогулянці... <span id="walk-timer">—</span>
+        <div class="walk-prog-wrap show"><div class="walk-pfill" id="wpf" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div id="walk-opts">
+      <div class="walk-card"><div class="walk-img">🏘️</div>
+        <button class="walk-btn" onclick="startWalk('yard',60,20,50,15)">У двір</button>
+        <div class="walk-dur">~60 сек · +20–50🪙 · +15 XP · камені</div></div>
+      <div class="walk-card"><div class="walk-img">🌲</div>
+        <button class="walk-btn" onclick="startWalk('park',120,50,150,35)">У парк</button>
+        <div class="walk-dur">~120 сек · +50–150🪙 · +35 XP · рідкісні камені</div></div>
+      <div class="walk-card"><div class="walk-img">🏕️</div>
+        <button class="walk-btn" onclick="startWalk('forest',180,100,300,60)">У ліс</button>
+        <div class="walk-dur">~180 сек · +100–300🪙 · +60 XP · рубіни</div></div>
+    </div>
+    <div class="card">
+      <div class="lb-title">🏅 Рейтинг прогулянок</div>
+      <div id="walk-lb"></div>
+    </div>
+  </div>
+
+  <!-- ══ SHOW (EXHIBITION) ══ -->
+  <div class="screen" id="pg-show">
+    <div class="page-hdr">🏆 Виставка котиків</div>
+    <div class="show-banner">
+      <div class="show-banner-title">🌟 Червнева виставка!</div>
+      <div class="show-banner-sub">Змагайся з іншими котиками та вигравай призи</div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Мій котик</div>
+      <div class="show-my-cat">
+        <div style="font-size:3rem" id="show-cat-emoji">🐱</div>
+        <div>
+          <div style="font-size:.9rem;font-weight:900;color:var(--gdk)" id="show-cat-name">Котик</div>
+          <div style="font-size:.75rem;color:var(--tl);font-weight:700">Краса: <b id="show-beauty">0</b> 🦋</div>
+          <div style="font-size:.75rem;color:var(--tl);font-weight:700">Рівень: <b id="show-level">1</b></div>
+        </div>
+      </div>
+    </div>
+    <div id="show-categories"></div>
+    <div class="card">
+      <div class="sec-title">🏅 Таблиця лідерів</div>
+      <div id="show-leaderboard"></div>
+    </div>
+  </div>
+
+  <!-- ══ SHOP ══ -->
+  <div class="screen" id="pg-shop">
+    <div class="page-hdr">🛍️ Магазин</div>
+    <div class="shop-categories" id="shop-cats">
+      <button class="shop-cat-btn active" onclick="filterShop('food')">🍖 Їжа</button>
+      <button class="shop-cat-btn" onclick="filterShop('clothes')">👗 Одяг</button>
+      <button class="shop-cat-btn" onclick="filterShop('accessories')">💍 Акс.</button>
+      <button class="shop-cat-btn" onclick="filterShop('gems')">💎 Камені</button>
+      <button class="shop-cat-btn" onclick="filterShop('special')">⭐ Особл.</button>
+    </div>
+    <div id="shop-items"></div>
+  </div>
+
+  <!-- ══ CLUBS ══ -->
+  <div class="screen" id="pg-clubs">
+    <div id="clubs-no-club">
+      <div class="page-hdr">🎈 Клуби</div>
+      <div class="card blue-card">
+        <p style="font-size:.78rem;font-weight:700;color:var(--tx);text-align:center;margin-bottom:8px">Клуб — об'єднання гравців! Спілкуйтесь, обмінюйтесь колекціями, допомагайте одне одному.</p>
+        <div style="display:flex;justify-content:center;gap:10px;font-size:1.8rem;margin:6px 0">🏢🏫🏪🎠🏗️🏡</div>
+        <div style="font-size:.72rem;color:var(--gn);font-weight:800;text-align:center">Бонуси учасників: +⭐ досвід · +❤️ сердечка · +🦋 краса</div>
+      </div>
+      <div class="card">
+        <div class="sec-title">Популярні клуби</div>
+        <div id="club-browser"></div>
+        <button class="grey-btn" style="margin-top:6px" onclick="loadClubs()">🔄 Оновити</button>
+      </div>
+      <div class="card">
+        <div class="sec-title">Створити клуб</div>
+        <input class="input-field" id="new-club-name" placeholder="Назва клубу">
+        <input class="input-field" id="new-club-desc" placeholder="Опис клубу">
+        <button class="orange-btn" onclick="createClub()">🏆 Створити і стати Директором</button>
+      </div>
+    </div>
+    <div id="clubs-in-club" style="display:none">
+      <div class="success-banner" id="club-join-banner">✅ Ви успішно вступили в клуб!</div>
+      <div class="club-page-card">
+        <div class="club-hero">
+          <div class="club-emblem" id="cl-emblem">🏰</div>
+          <div>
+            <div class="club-hero-name" id="cl-name">Клуб</div>
+            <div class="stars" id="cl-stars">★★★☆☆</div>
+            <div style="font-size:.68rem;color:var(--tl);font-weight:700" id="cl-role-badge"></div>
+          </div>
+        </div>
+      </div>
+      <div class="club-page-card">
+        <div class="club-meta-row"><span>ℹ️</span><span id="cl-desc" class="meta-val"></span></div>
+        <div class="club-meta-row"><span>📅</span><span class="meta-val">Засновано: <b id="cl-founded"></b></span></div>
+        <div class="club-meta-row"><span>⬆️</span><span class="meta-val">Рівень клубу: <b id="cl-level">1</b></span></div>
+        <div class="club-meta-row"><span>⭐</span><span class="meta-val">Досвід: <b id="cl-xp">0.00g</b></span></div>
+        <div class="club-meta-row"><span>👥</span><span class="meta-val">Учасників: <b id="cl-mcount">1</b></span></div>
+      </div>
+      <div class="club-page-card">
+        <div style="display:flex;justify-content:center;gap:8px;font-size:1.8rem;padding:6px 0" id="cl-buildings">🏢🏫🏪🎠</div>
+        <div style="text-align:center;font-size:.72rem;font-weight:800;color:var(--gdk)">Постройки: <span id="cl-blvl">4</span> рівень</div>
+      </div>
+      <div class="club-page-card">
+        <div class="club-piggy">🐷 Копилка: 🪙 <span id="cl-pc">0</span> · ❤️ <span id="cl-ph">0</span></div>
+        <button class="green-btn" onclick="donateClub()">Пожертвувати 🪙 10 до копилки</button>
+        <div style="margin-top:10px">
+          <div class="club-menu-row" onclick="goPage('chat')"><span>💬</span> Чат клубу</div>
+          <div class="club-menu-row" onclick="goPage('mail')"><span>📬</span> Написати учаснику</div>
+          <div class="club-menu-row" onclick="openCollectionExchange()"><span>🔄</span> Обмін колекціями</div>
+          <div class="club-menu-row" onclick="showClubHistory()"><span>📜</span> Історія клубу</div>
+          <div class="club-menu-row" id="club-settings-row" style="display:none" onclick="notify('⚙️ Незабаром','Налаштування клубу в розробці!')"><span>⚙️</span> Налаштування клубу</div>
+        </div>
+      </div>
+      <div class="club-page-card">
+        <div class="sec-title">Склад клубу (<span id="cl-mc">0</span>)</div>
+        <div id="cl-members"></div>
+      </div>
+      <button class="grey-btn" onclick="leaveClub()">🚪 Вийти з клубу</button>
+    </div>
+  </div>
+
+  <!-- ══ RATINGS ══ -->
+  <div class="screen" id="pg-ratings">
+    <div class="page-hdr">🏆 Рейтинги</div>
+    <div class="rating-tabs">
+      <button class="rtab active" id="rt-players" onclick="switchRating('players')">👤 Гравці</button>
+      <button class="rtab" id="rt-clubs" onclick="switchRating('clubs')">🎈 Клуби</button>
+      <button class="rtab" id="rt-beauty" onclick="switchRating('beauty')">🦋 Краса</button>
+    </div>
+    <div class="card"><div id="rating-list"><div class="loading-inline">Завантаження...</div></div></div>
+  </div>
+
+  <!-- ══ MAIL ══ -->
+  <div class="screen" id="pg-mail">
+    <div id="mail-list-view">
+      <div class="page-hdr">📬 Пошта</div>
+      <div class="mail-tabs">
+        <button class="mtab active" id="mt-inbox" onclick="switchMail('inbox')">📥 Вхідні <span id="unread-cnt" class="badge-inline"></span></button>
+        <button class="mtab" id="mt-sent" onclick="switchMail('sent')">📤 Надіслані</button>
+        <button class="mtab" id="mt-system" onclick="switchMail('system')">🔔 Системні</button>
+      </div>
+      <button class="mail-compose-btn" onclick="showCompose()">✏️ Написати повідомлення</button>
+      <div id="mail-items"></div>
+    </div>
+    <div class="mail-detail-view" id="mail-detail" style="display:none">
+      <button class="back-btn" onclick="closeMailDetail()">← Назад</button>
+      <div class="club-page-card">
+        <div style="font-size:.7rem;color:var(--tl);font-weight:700;margin-bottom:4px">Від: <b id="md-from" style="color:var(--gdk)"></b> · <span id="md-time"></span></div>
+        <div style="font-size:.9rem;font-weight:900;color:var(--tx);margin-bottom:10px" id="md-subj"></div>
+        <div style="font-size:.82rem;color:var(--tx);line-height:1.8;font-weight:600" id="md-body"></div>
+      </div>
+      <button class="green-btn" onclick="replyTo()">↩️ Відповісти</button>
+    </div>
+    <div class="compose-view" id="compose-view" style="display:none">
+      <button class="back-btn" onclick="closeCompose()">← Назад</button>
+      <div class="card">
+        <div class="sec-title">Нове повідомлення</div>
+        <input class="input-field" id="cm-to" placeholder="Кому (нікнейм гравця)">
+        <input class="input-field" id="cm-subj" placeholder="Тема">
+        <textarea class="input-field" id="cm-body" placeholder="Текст..." style="height:90px;resize:none"></textarea>
+        <button class="orange-btn" onclick="sendMail()">📤 Надіслати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHAT ══ -->
+  <div class="screen" id="pg-chat">
+    <div class="page-hdr">💬 Загальний чат</div>
+    <div class="online-pill">🟢 Онлайн: <span id="chat-on">—</span></div>
+    <div class="card" style="padding:12px">
+      <div class="chat-msgs" id="chat-msgs"><div class="loading-inline">Завантаження чату...</div></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-in" placeholder="Написати..." maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /inner -->
+</div><!-- /game-wrap -->
+
+<!-- FIXED BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none">
+  <div class="bnav-inner">
+    <button class="bnav-btn active" id="nb-home" onclick="goPage('home')"><span class="ni">🏠</span><span class="nl">Головна</span></button>
+    <button class="bnav-btn" id="nb-pet" onclick="goPage('pet')"><span class="ni">🐱</span><span class="nl">Котик</span></button>
+    <button class="bnav-btn" id="nb-clubs" onclick="goPage('clubs')"><span class="ni">🎈</span><span class="nl">Клуби</span></button>
+    <button class="bnav-btn" id="nb-ratings" onclick="goPage('ratings')"><span class="ni">🏆</span><span class="nl">Рейтинг</span></button>
+    <button class="bnav-btn" id="nb-mail" onclick="goPage('mail')"><span class="ni">📬</span><span class="nl">Пошта</span><span class="nav-badge" id="mail-badge" style="display:none">0</span></button>
+    <button class="bnav-btn" id="nb-chat" onclick="goPage('chat')"><span class="ni">💬</span><span class="nl">Чат</span></button>
+  </div>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="wardrobe-modal" onclick="closeWardrobe()" style="display:none">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="wardrobe-title">🚪 Шафа</div>
+    <div class="modal-close" onclick="closeWardrobe()">✕</div>
+    <div class="clothes-filter">
+      <button class="cf-btn active" onclick="filterWardrobe('all')">Всі</button>
+      <button class="cf-btn" onclick="filterWardrobe('shirt')">👕 Одяг</button>
+      <button class="cf-btn" onclick="filterWardrobe('collar')">➿ Нашийник</button>
+      <button class="cf-btn" onclick="filterWardrobe('hat')">🎩 Капелюх</button>
+      <button class="cf-btn" onclick="filterWardrobe('ring')">💍 Кільце</button>
+    </div>
+    <div class="wardrobe-grid" id="wardrobe-grid"></div>
+    <div style="text-align:center;font-size:.7rem;color:var(--tl);font-weight:700;margin-top:8px">
+      Шафа: <span id="wardrobe-used">0</span>/20 слотів використано
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gifts-modal" onclick="closeGifts()" style="display:none">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">🎁 Подарунки</div>
+    <div class="modal-close" onclick="closeGifts()">✕</div>
+    <div id="gifts-received-section"></div>
+    <div class="sec-title" style="margin-top:12px">Надіслати подарунок</div>
+    <input class="input-field" id="gift-to" placeholder="Нікнейм гравця">
+    <div class="gift-picker" id="gift-picker"></div>
+    <button class="orange-btn" onclick="sendGift()">🎁 Надіслати</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="level-up-modal" style="display:none">
+  <div class="modal-box level-up-box" onclick="closeLevelUp()">
+    <div class="lup-fireworks">🎉🎊🎉</div>
+    <div class="lup-title">Новий рівень!</div>
+    <div class="lup-level" id="lup-level">2</div>
+    <div class="lup-rewards" id="lup-rewards"></div>
+    <button class="orange-btn" onclick="closeLevelUp()">Чудово! 🐾</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="about-modal" onclick="closeAbout()" style="display:none">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">✏️ Про себе</div>
+    <div class="modal-close" onclick="closeAbout()">✕</div>
+    <textarea class="input-field" id="about-text" placeholder="Розкажи про свого котика..." style="height:90px;resize:none"></textarea>
+    <button class="orange-btn" onclick="saveAbout()">💾 Зберегти</button>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
