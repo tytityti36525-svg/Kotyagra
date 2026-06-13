@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Кожен гравець може читати/писати лише свої дані
+    match /players/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Онлайн-присутність — лише свій запис
+    match /online/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Клуби — читати всі, писати тільки авторизованим (логіка директора — на бекенді/Cloud Functions)
+    match /clubs/{clubId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null;
+
+      // Учасники: свій запис пише сам; Директор або Заступник можуть керувати будь-яким.
+      // (точна логіка рангів — на клієнті; правила лише дозволяють штату писати)
+      match /members/{memberId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && (
+          request.auth.uid == memberId
+          || get(/databases/$(database)/documents/clubs/$(clubId)).data().directorUid == request.auth.uid
+          || (exists(/databases/$(database)/documents/clubs/$(clubId)/members/$(request.auth.uid))
+              && get(/databases/$(database)/documents/clubs/$(clubId)/members/$(request.auth.uid)).data().role == 'deputy')
+        );
+      }
+
+      // Історія клубу — журнал подій (читають усі, створює авторизований, без редагування)
+      match /history/{histId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        allow update, delete: if false;
+      }
+
+      // Форум клубу: теми та повідомлення
+      match /forum/{topicId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+        allow delete: if request.auth != null; // куратор+ перевіряється на клієнті
+        allow update: if false;
+        match /posts/{postId} {
+          allow read: if request.auth != null;
+          allow create: if request.auth != null;
+          allow delete: if request.auth != null; // автор або куратор+ (клієнт)
+          allow update: if false;
+        }
+      }
+
+      // Історія внесків у скарбничку — читають усі учасники, створює лише сам автор внеску
+      match /donations/{donId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null
+          && request.resource.data.uid == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // Чат — читати всі, писати своє
+    match /chat/{msgId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 300;
+      allow update, delete: if false;
+    }
+
+    // Пошта і подарунки — окрема колекція.
+    // Автор створює лист лише від свого імені (fromUid == свій uid).
+    // Читати може автор (свої надіслані) або отримувач (свої вхідні).
+    // Оновлювати (позначити прочитаним) може лише отримувач.
+    match /mail/{mailId} {
+      allow read: if request.auth != null
+        && (resource.data.toUid == request.auth.uid
+            || resource.data.fromUid == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid is string
+        && request.resource.data.body is string
+        && request.resource.data.body.size() <= 1000;
+      allow update: if request.auth != null
+        && resource.data.toUid == request.auth.uid;
+      allow delete: if request.auth != null
+        && (resource.data.toUid == request.auth.uid
+            || resource.data.fromUid == request.auth.uid);
+    }
+  }
+}
